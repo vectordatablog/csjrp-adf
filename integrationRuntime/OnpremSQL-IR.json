@@ -1,0 +1,7 @@
+{
+	"name": "OnpremSQL-IR",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Integration runtime to connect to local SQL Server instance"
+	}
+}
