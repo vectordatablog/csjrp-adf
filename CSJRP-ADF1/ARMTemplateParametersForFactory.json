@@ -1,0 +1,18 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "CSJRP-ADF1"
+		},
+		"OnpremSQLServer_ls_properties_typeProperties_connectionString_secretName": {
+			"value": "onpremsqlconn"
+		},
+		"csjrp_kv_ls_properties_typeProperties_baseUrl": {
+			"value": "https://csjrp-kv1.vault.azure.net/"
+		},
+		"storage_adls_ls_properties_typeProperties_url": {
+			"value": "https://csjrpproject1.dfs.core.windows.net/"
+		}
+	}
+}
