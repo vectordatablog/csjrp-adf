@@ -120,8 +120,42 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "sendEmailonFailure",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "onprem_tables_lookup",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-20.centralus.logic.azure.com:443/workflows/c9165ac86dcc4a7990bb6eeb4b580538/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sbj019mw9rRXHwQectJTinSMrNSby2GO7QB8vFh4Jw0",
+					"method": "POST",
+					"headers": {
+						"Content-type": "application/json"
+					},
+					"body": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"onprem_tables_lookup\",\n    \"ErrorMessage\" : \" @{activity('onprem_tables_lookup').Error.Message}\",\n   }"
+				}
 			}
 		],
+		"parameters": {
+			"EmailTo": {
+				"type": "string",
+				"defaultValue": "reddylaxman.nalla@outlook.com"
+			}
+		},
 		"annotations": []
 	}
 }
