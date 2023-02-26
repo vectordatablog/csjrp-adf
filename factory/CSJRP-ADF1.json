@@ -1,0 +1,9 @@
+{
+	"name": "CSJRP-ADF1",
+	"location": "centralus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d00d0e85-e83b-4850-88f4-882af4bd6fc1",
+		"tenantId": "863bd695-3bbb-47c0-a8a2-b8c604bc5226"
+	}
+}
