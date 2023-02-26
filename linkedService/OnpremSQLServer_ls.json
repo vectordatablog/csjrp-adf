@@ -1,0 +1,22 @@
+{
+	"name": "OnpremSQLServer_ls",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "csjrp_kv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "onpremsqlconn",
+				"secretVersion": "5ed1299e8a5b419ea8204b2c0bd7e857"
+			}
+		},
+		"connectVia": {
+			"referenceName": "OnpremSQL-IR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
