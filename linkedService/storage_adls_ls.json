@@ -1,0 +1,10 @@
+{
+	"name": "storage_adls_ls",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://csjrpproject1.dfs.core.windows.net/"
+		}
+	}
+}
