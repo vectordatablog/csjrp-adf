@@ -1,0 +1,10 @@
+{
+	"name": "csjrp_kv_ls",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://csjrp-kv1.vault.azure.net/"
+		}
+	}
+}
