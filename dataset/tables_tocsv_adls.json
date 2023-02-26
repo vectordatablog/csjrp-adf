@@ -1,0 +1,39 @@
+{
+	"name": "tables_tocsv_adls",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "storage_adls_ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().table",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().schema",
+					"type": "Expression"
+				},
+				"fileSystem": "tables"
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
