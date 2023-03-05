@@ -11,6 +11,10 @@
 			"type": "string",
 			"defaultValue": "onpremsqlconn"
 		},
+		"csjrp_dbricks_ls_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0304-002117-1eobtv1e"
+		},
 		"csjrp_kv_ls_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://csjrp-kv1.vault.azure.net/"
@@ -45,6 +49,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"csjrp_dbricks_ls_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('csjrp_dbricks_ls_properties_typeProperties_existingClusterId')]"
 					},
 					"csjrp_kv_ls_properties_typeProperties_baseUrl": {
 						"value": "[parameters('csjrp_kv_ls_properties_typeProperties_baseUrl')]"

@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "CSJRP-ADF1"
 		},
+		"csjrp_dbricks_ls_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0304-002117-1eobtv1e"
+		},
 		"csjrp_kv_ls_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://csjrp-kv1.vault.azure.net/"
@@ -25,6 +29,22 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/csjrp_dbricks_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7171327076467765.5.azuredatabricks.net",
+					"authentication": "MSI",
+					"workspaceResourceId": "/subscriptions/2b2b9e10-68b9-4ff6-b6b1-cd3b403463f0/resourceGroups/CSJRP-project/providers/Microsoft.Databricks/workspaces/csjrp-dbx1",
+					"existingClusterId": "[parameters('csjrp_dbricks_ls_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/csjrp_kv_ls')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -34,17 +54,6 @@
 				"typeProperties": {
 					"baseUrl": "[parameters('csjrp_kv_ls_properties_typeProperties_baseUrl')]"
 				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnpremSQL-IR')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Integration runtime to connect to local SQL Server instance",
-				"typeProperties": {}
 			},
 			"dependsOn": []
 		},
@@ -62,32 +71,15 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/OnpremSQLServer_ls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/OnpremSQL-IR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "csjrp_kv_ls",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "[parameters('OnpremSQLServer_ls_properties_typeProperties_connectionString_secretName')]",
-						"secretVersion": "5ed1299e8a5b419ea8204b2c0bd7e857"
-					}
-				},
-				"connectVia": {
-					"referenceName": "OnpremSQL-IR",
-					"type": "IntegrationRuntimeReference"
-				}
+				"type": "SelfHosted",
+				"description": "Integration runtime to connect to local SQL Server instance",
+				"typeProperties": {}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/OnpremSQL-IR')]",
-				"[concat(variables('factoryId'), '/linkedServices/csjrp_kv_ls')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/tables_tocsv_adls')]",
@@ -131,6 +123,34 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/storage_adls_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnpremSQLServer_ls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "csjrp_kv_ls",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('OnpremSQLServer_ls_properties_typeProperties_connectionString_secretName')]",
+						"secretVersion": "5ed1299e8a5b419ea8204b2c0bd7e857"
+					}
+				},
+				"connectVia": {
+					"referenceName": "OnpremSQL-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/OnpremSQL-IR')]",
+				"[concat(variables('factoryId'), '/linkedServices/csjrp_kv_ls')]"
 			]
 		},
 		{
@@ -197,8 +217,8 @@
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
+							"timeout": "0.00:01:10",
+							"retry": 1,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": false
@@ -238,7 +258,7 @@
 							},
 							"activities": [
 								{
-									"name": "oonprem_table_to_csv",
+									"name": "copy_onprem_table_to_csv",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -308,6 +328,37 @@
 											}
 										}
 									]
+								},
+								{
+									"name": "send_copyfailuremessage",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "copy_onprem_table_to_csv",
+											"dependencyConditions": [
+												"Failed"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://prod-20.centralus.logic.azure.com:443/workflows/c9165ac86dcc4a7990bb6eeb4b580538/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sbj019mw9rRXHwQectJTinSMrNSby2GO7QB8vFh4Jw0",
+										"method": "POST",
+										"headers": {
+											"content-type": "application/json"
+										},
+										"body": {
+											"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"copy_onprem_table_to_csv\",\n    \"ErrorMessage\" : \" @{activity('copy_onprem_table_to_csv').Error.Message}\",\n   }",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -337,7 +388,68 @@
 							"headers": {
 								"Content-type": "application/json"
 							},
-							"body": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"onprem_tables_lookup\",\n    \"ErrorMessage\" : \" @{activity('onprem_tables_lookup').Error.Message}\",\n   }"
+							"body": {
+								"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"onprem_tables_lookup\",\n    \"ErrorMessage\" : \" @{activity('onprem_tables_lookup').Error.Message}\",\n   }",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "forLoop_email_failure",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "schema-table-loop",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://prod-20.centralus.logic.azure.com:443/workflows/c9165ac86dcc4a7990bb6eeb4b580538/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=sbj019mw9rRXHwQectJTinSMrNSby2GO7QB8vFh4Jw0",
+							"method": "POST",
+							"headers": {
+								"content-type": "application/json"
+							},
+							"body": {
+								"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"schema-table-loop\",\n    \"ErrorMessage\" : \" @{activity('schema-table-loop').Error.Message}\",\n   }",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "delta transform notebook",
+						"type": "DatabricksNotebook",
+						"dependsOn": [
+							{
+								"activity": "schema-table-loop",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebookPath": "/CSJRP-project/transform-bronze-silver"
+						},
+						"linkedServiceName": {
+							"referenceName": "csjrp_dbricks_ls",
+							"type": "LinkedServiceReference"
 						}
 					}
 				],
@@ -355,6 +467,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/Onprem_sqlserver_ds')]",
+				"[concat(variables('factoryId'), '/linkedServices/csjrp_dbricks_ls')]",
 				"[concat(variables('factoryId'), '/datasets/table_tocsv')]",
 				"[concat(variables('factoryId'), '/datasets/tables_tocsv_adls')]"
 			]

@@ -8,6 +8,9 @@
 		"OnpremSQLServer_ls_properties_typeProperties_connectionString_secretName": {
 			"value": "onpremsqlconn"
 		},
+		"csjrp_dbricks_ls_properties_typeProperties_existingClusterId": {
+			"value": "0304-002117-1eobtv1e"
+		},
 		"csjrp_kv_ls_properties_typeProperties_baseUrl": {
 			"value": "https://csjrp-kv1.vault.azure.net/"
 		},
