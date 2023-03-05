@@ -1,0 +1,13 @@
+{
+	"name": "csjrp_dbricks_ls",
+	"properties": {
+		"annotations": [],
+		"type": "AzureDatabricks",
+		"typeProperties": {
+			"domain": "https://adb-7171327076467765.5.azuredatabricks.net",
+			"authentication": "MSI",
+			"workspaceResourceId": "/subscriptions/2b2b9e10-68b9-4ff6-b6b1-cd3b403463f0/resourceGroups/CSJRP-project/providers/Microsoft.Databricks/workspaces/csjrp-dbx1",
+			"existingClusterId": "0304-002117-1eobtv1e"
+		}
+	}
+}
