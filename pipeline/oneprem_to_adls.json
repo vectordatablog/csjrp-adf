@@ -143,7 +143,10 @@
 								"headers": {
 									"content-type": "application/json"
 								},
-								"body": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"copy_onprem_table_to_csv\",\n    \"ErrorMessage\" : \" @{activity('copy_onprem_table_to_csv').Error.Message}\",\n   }"
+								"body": {
+									"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"copy_onprem_table_to_csv\",\n    \"ErrorMessage\" : \" @{activity('copy_onprem_table_to_csv').Error.Message}\",\n   }",
+									"type": "Expression"
+								}
 							}
 						}
 					]
@@ -174,7 +177,10 @@
 					"headers": {
 						"Content-type": "application/json"
 					},
-					"body": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"onprem_tables_lookup\",\n    \"ErrorMessage\" : \" @{activity('onprem_tables_lookup').Error.Message}\",\n   }"
+					"body": {
+						"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"onprem_tables_lookup\",\n    \"ErrorMessage\" : \" @{activity('onprem_tables_lookup').Error.Message}\",\n   }",
+						"type": "Expression"
+					}
 				}
 			},
 			{
@@ -202,7 +208,37 @@
 					"headers": {
 						"content-type": "application/json"
 					},
-					"body": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"schema-table-loop\",\n    \"ErrorMessage\" : \" @{activity('schema-table-loop').Error.Message}\",\n   }"
+					"body": {
+						"value": "{\n\"EmailTo\": \"@{pipeline().parameters.EmailTo}\",\n\"Subject\":\"An error has occured in the pipeline @{pipeline().Pipeline}-pipeline, Runid: @{pipeline().Runid}\",\n \"DataFactoryName\" : \"@{pipeline().DataFactory}\", \n    \"PipelineName\" : \"@{pipeline().Pipeline}\", \n\"Activity\": \"schema-table-loop\",\n    \"ErrorMessage\" : \" @{activity('schema-table-loop').Error.Message}\",\n   }",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "delta transform notebook",
+				"type": "DatabricksNotebook",
+				"dependsOn": [
+					{
+						"activity": "schema-table-loop",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/CSJRP-project/transform-bronze-silver"
+				},
+				"linkedServiceName": {
+					"referenceName": "csjrp_dbricks_ls",
+					"type": "LinkedServiceReference"
 				}
 			}
 		],
